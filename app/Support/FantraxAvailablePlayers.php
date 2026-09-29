@@ -50,7 +50,7 @@ class FantraxAvailablePlayers
 
         $json=$response->json();
         if(!is_array($json)) throw new RuntimeException('Fantrax returned invalid JSON.');
-        if(!empty($json['pageError']['code'])) throw new RuntimeException('Fantrax API error '.$json['pageError']['code'].': '.($json['pageError']['text']??'unknown error'));
+        if(!empty($json['pageError']['code'])) throw new RuntimeException('This Fantrax league is private, inaccessible, or does not expose its player list publicly.');
 
         $data=$json['responses'][0]['data']??null;
         if(!is_array($data)) throw new RuntimeException('Fantrax returned no player response data.');
@@ -119,6 +119,51 @@ class FantraxAvailablePlayers
 
         if(!$rows&&$positionGroup!=='G') throw new RuntimeException('Fantrax returned rows but none were parseable as available players.');
         return ['url'=>$url,'rows'=>$rows];
+    }
+
+    public function diagnoseLeague(string $leagueId): array
+    {
+        if(!preg_match('/^[A-Za-z0-9_-]{5,64}$/D',$leagueId)) {
+            return ['accessible'=>false,'has_players'=>false];
+        }
+
+        $url='https://www.fantrax.com/fantasy/league/'.$leagueId.'/players';
+        $payload=[
+            'msgs'=>[['method'=>'getPlayerStats','data'=>[
+                'statusOrTeamFilter'=>'ALL_AVAILABLE',
+                'maxResultsPerPage'=>1,
+                'pageNumber'=>'1',
+                'seasonOrProjection'=>'PROJECTION_0_31n_SEASON',
+                'timeframeTypeCode'=>'PROJECTED_SEASON',
+            ]]],
+            'uiv'=>3,'refUrl'=>$url,'dt'=>0,'at'=>0,'av'=>'0.0',
+            'tz'=>'America/Halifax','v'=>self::API_VERSION,
+        ];
+
+        try{
+            $response=Http::timeout(30)->retry(1,1000)->withHeaders([
+                'User-Agent'=>'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/153 Safari/537.36',
+                'Accept'=>'application/json',
+                'Content-Type'=>'application/json',
+                'Referer'=>$url,
+            ])->post('https://www.fantrax.com/fxpa/req?leagueId='.$leagueId,$payload)->throw();
+
+            $json=$response->json();
+            if(!is_array($json)||!empty($json['pageError']['code'])) {
+                return ['accessible'=>false,'has_players'=>false];
+            }
+
+            $data=$json['responses'][0]['data']??null;
+            if(!is_array($data)) return ['accessible'=>false,'has_players'=>false];
+
+            $stats=$data['statsTable']??[];
+            $total=$data['paginatedResultSet']['totalNumResults']??$data['paginatedResultSet']['totalResults']??null;
+            $hasPlayers=!empty($stats)||((int)$total>0);
+
+            return ['accessible'=>true,'has_players'=>$hasPlayers];
+        }catch(\Throwable){
+            return ['accessible'=>false,'has_players'=>false];
+        }
     }
 
     private function position(string $value): ?string
