@@ -61,7 +61,7 @@ Route::post('/refresh/fantrax', function (Request $request, FantraxRefresh $refr
     }catch(\Throwable $e){
         return redirect('/?league='.rawurlencode($leagueId))->with('error','Fantrax refresh failed: '.$e->getMessage());
     }
-})->name('refresh.fantrax');
+})->middleware('throttle:10,1')->name('refresh.fantrax');
 
 
 Route::get('/collector-status', function () {
