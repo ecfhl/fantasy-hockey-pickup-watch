@@ -29,10 +29,10 @@ main{padding:24px 0 50px}.panel,.table-card{background:var(--surface);border:1px
 <header class="hero"><div class="shell"><h1>Fantasy Hockey Pickup Watch</h1><p>Available Fantrax players enhanced with Daily Faceoff lineup information.</p><p style="margin-top:10px"><a href="{{ route('collector.status') }}" style="color:#fff;font-weight:800;text-decoration:none">Collector Status</a></p></div></header>
 <main><div class="shell">
 <section class="panel">
-<form method="post" action="/refresh/fantrax" class="league-form">
+<form method="post" action="/refresh/fantrax" class="league-form" id="fantrax-refresh-form">
 @csrf
 <div class="field"><label for="league_id">Fantrax League ID</label><input id="league_id" name="league_id" type="text" value="{{ $leagueId }}" list="known-leagues" placeholder="Enter Fantrax league ID" required><datalist id="known-leagues">@foreach($knownLeagues as $known)<option value="{{ $known }}"></option>@endforeach</datalist></div>
-<button class="button" type="submit">Refresh Fantrax Players</button>
+<button class="button" type="submit" id="fantrax-refresh-button">Refresh Fantrax Players</button>
 </form>
 @if(session('success'))<div class="message ok">{{ session('success') }}</div>@endif
 @if(session('error'))<div class="message error">{{ session('error') }}</div>@endif
@@ -84,6 +84,16 @@ $sections=[
 </div></main>
 
 <script>
+const fantraxForm=document.getElementById('fantrax-refresh-form');
+const fantraxButton=document.getElementById('fantrax-refresh-button');
+if(fantraxForm&&fantraxButton){
+ fantraxForm.addEventListener('submit',()=>{
+   fantraxButton.disabled=true;
+   fantraxButton.textContent='Refreshing Fantrax Players…';
+   fantraxButton.style.opacity='.7';
+   fantraxButton.style.cursor='wait';
+ });
+}
 document.querySelectorAll('[data-age]').forEach(el=>{
  const then=new Date(el.dataset.age);
  const seconds=Math.max(0,Math.floor((Date.now()-then.getTime())/1000));
