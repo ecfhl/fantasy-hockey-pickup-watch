@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Fantasy Hockey Pickup Watch</title>
+<link rel="icon" type="image/png" href="/favicon.png?v=1">
+<link rel="apple-touch-icon" href="/favicon.png?v=1">
 <style>
 :root{--bg:#f6f7fb;--surface:#fff;--text:#172033;--muted:#667085;--line:#dfe3ea;--accent:#2563eb}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
