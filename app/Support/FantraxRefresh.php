@@ -31,6 +31,23 @@ class FantraxRefresh
             $prepared[$date->toDateString()]=array_values($merged);
         }
 
+        $todayCount=count($prepared[$dates[0]->toDateString()]??[]);
+        $tomorrowCount=count($prepared[$dates[1]->toDateString()]??[]);
+
+        if($todayCount===0&&$tomorrowCount===0){
+            $diagnosis=$this->fantrax->diagnoseLeague($leagueId);
+
+            if(!$diagnosis['accessible']){
+                throw new \RuntimeException('This Fantrax league is private or does not expose its player list publicly.');
+            }
+
+            if($diagnosis['has_players']){
+                throw new \RuntimeException('This Fantrax league is accessible, but it returned no players for today or tomorrow. It likely belongs to a previous season or has no games on these dates.');
+            }
+
+            throw new \RuntimeException('This Fantrax league appears to be from a previous or inactive season, or it has no publicly available player pool.');
+        }
+
         $stamp=CarbonImmutable::now();
         DB::transaction(function()use($leagueId,$prepared,$stamp){
             DB::table('fantrax_leagues')->updateOrInsert(
