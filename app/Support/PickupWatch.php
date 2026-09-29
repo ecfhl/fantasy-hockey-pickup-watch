@@ -72,7 +72,7 @@ class PickupWatch
         }
 
         foreach(['F','D'] as $position){
-            usort($groups[$position],fn($a,$b)=>(($b['projected_points']??-INF)<=>($a['projected_points']??-INF))?:($a['source_rank']<=>$b['source_rank'])?:strcasecmp($a['name'],$b['name']));
+            usort($groups[$position],fn($a,$b)=>(($b['projected_points']??-PHP_FLOAT_MAX)<=>($a['projected_points']??-PHP_FLOAT_MAX))?:($a['source_rank']<=>$b['source_rank'])?:strcasecmp($a['name'],$b['name']));
         }
 
         $priority=static function($p):int{
@@ -81,7 +81,7 @@ class PickupWatch
                 'confirmed'=>0,'probable'=>1,'unconfirmed'=>2,default=>3,
             };
         };
-        usort($groups['G'],fn($a,$b)=>($priority($a)<=>$priority($b))?:(($b['projected_points']??-INF)<=>($a['projected_points']??-INF))?:strcasecmp($a['name'],$b['name']));
+        usort($groups['G'],fn($a,$b)=>($priority($a)<=>$priority($b))?:(($b['projected_points']??-PHP_FLOAT_MAX)<=>($a['projected_points']??-PHP_FLOAT_MAX))?:strcasecmp($a['name'],$b['name']));
 
         return $groups;
     }
