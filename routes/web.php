@@ -62,3 +62,50 @@ Route::post('/refresh/fantrax', function (Request $request, FantraxRefresh $refr
         return redirect('/?league='.rawurlencode($leagueId))->with('error','Fantrax refresh failed: '.$e->getMessage());
     }
 })->name('refresh.fantrax');
+
+
+Route::get('/collector-status', function () {
+    $tz='America/Halifax';
+    $now=CarbonImmutable::now($tz);
+
+    $goaliesLast=DB::table('active_starting_goalies')->max('checked_at');
+    $linesLast=DB::table('active_line_combinations')->max('checked_at');
+    $ppLast=DB::table('active_pp_lines')->max('checked_at');
+
+    $goaliesCount=DB::table('active_starting_goalies')->count();
+    $linesCount=DB::table('active_line_combinations')->count();
+    $ppCount=DB::table('active_pp_lines')->count();
+
+    $lastGoalies=$goaliesLast ? CarbonImmutable::parse($goaliesLast,$tz) : null;
+    $lastLinesRaw=$linesLast ?: $ppLast;
+    $lastLines=$lastLinesRaw ? CarbonImmutable::parse($lastLinesRaw,$tz) : null;
+
+    $nextGoalies=$now->minute < 30
+        ? $now->startOfHour()->addMinutes(30)
+        : $now->addHour()->startOfHour();
+
+    $nextLines=$now->startOfDay()->addHours(((int)floor($now->hour/4)+1)*4);
+
+    $collectors=[
+        [
+            'name'=>'Starting Goalies',
+            'command'=>'pickup:refresh-goalies',
+            'schedule'=>'Every 30 minutes',
+            'last_run'=>$lastGoalies,
+            'next_run'=>$nextGoalies,
+            'records'=>$goaliesCount,
+            'healthy'=>$lastGoalies && $lastGoalies->greaterThanOrEqualTo($now->subMinutes(60)),
+        ],
+        [
+            'name'=>'Lines & Power Play',
+            'command'=>'pickup:refresh-lines',
+            'schedule'=>'Every 4 hours',
+            'last_run'=>$lastLines,
+            'next_run'=>$nextLines,
+            'records'=>$linesCount+$ppCount,
+            'healthy'=>$lastLines && $lastLines->greaterThanOrEqualTo($now->subHours(8)),
+        ],
+    ];
+
+    return view('collector-status',compact('collectors','now'));
+})->name('collector.status');

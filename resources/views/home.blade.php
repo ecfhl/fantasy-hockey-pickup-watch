@@ -24,7 +24,7 @@ main{padding:24px 0 50px}.panel,.table-card{background:var(--surface);border:1px
 </style>
 </head>
 <body>
-<header class="hero"><div class="shell"><h1>Fantasy Hockey Pickup Watch</h1><p>Available Fantrax players enhanced with Daily Faceoff lineup information.</p></div></header>
+<header class="hero"><div class="shell"><h1>Fantasy Hockey Pickup Watch</h1><p>Available Fantrax players enhanced with Daily Faceoff lineup information.</p><p style="margin-top:10px"><a href="{{ route('collector.status') }}" style="color:#fff;font-weight:800;text-decoration:none">Collector Status</a></p></div></header>
 <main><div class="shell">
 <section class="panel">
 <form method="post" action="{{ route('refresh.fantrax') }}" class="league-form">

@@ -110,5 +110,5 @@ Artisan::command('pickup:refresh-lines', function (DailyFaceoffPowerPlay $collec
     return $failed?1:0;
 });
 
-Schedule::command('pickup:refresh-goalies')->hourlyAt(1)->withoutOverlapping(55)->runInBackground();
+Schedule::command('pickup:refresh-goalies')->everyThirtyMinutes()->withoutOverlapping(25)->runInBackground();
 Schedule::command('pickup:refresh-lines')->cron('2 */4 * * *')->withoutOverlapping(240)->runInBackground();
