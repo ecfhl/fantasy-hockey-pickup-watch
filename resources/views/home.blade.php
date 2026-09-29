@@ -35,7 +35,7 @@ main{padding:24px 0 50px}.panel,.table-card{background:var(--surface);border:1px
 @if(session('success'))<div class="message ok">{{ session('success') }}</div>@endif
 @if(session('error'))<div class="message error">{{ session('error') }}</div>@endif
 @if($leagueId)
-<div class="meta">Selected league: <strong>{{ $leagueId }}</strong>@if($league?->last_refresh_at) · Fantrax last refreshed <span data-age="{{ $league->last_refresh_at }}"></span>@endif</div>
+<div class="meta">Selected league: <strong>{{ $leagueId }}</strong>@if($league?->last_refresh_at) · Fantrax last refreshed <span data-age="{{ \Carbon\CarbonImmutable::parse($league->last_refresh_at, 'America/Moncton')->toIso8601String() }}"></span>@endif</div>
 @else
 <div class="meta">Enter a league ID and refresh it to load that league's available players. Other saved leagues are not changed.</div>
 @endif
@@ -83,7 +83,7 @@ $sections=[
 
 <script>
 document.querySelectorAll('[data-age]').forEach(el=>{
- const then=new Date(el.dataset.age.replace(' ','T')+'Z');
+ const then=new Date(el.dataset.age);
  const seconds=Math.max(0,Math.floor((Date.now()-then.getTime())/1000));
  let text;
  if(seconds<60) text=seconds+' '+(seconds===1?'second':'seconds')+' ago';
