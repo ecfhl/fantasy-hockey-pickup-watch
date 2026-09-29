@@ -78,7 +78,7 @@ class PickupWatch
         $priority=static function($p):int{
             if(!empty($p['not_starting'])) return 4;
             return match(strtolower(trim((string)($p['starting_status']??'')))){
-                'confirmed'=>0,'probable'=>1,'unconfirmed'=>2,default=>3,
+                'confirmed'=>0,'likely'=>1,'unconfirmed'=>2,default=>3,
             };
         };
         usort($groups['G'],fn($a,$b)=>($priority($a)<=>$priority($b))?:(($b['projected_points']??-PHP_FLOAT_MAX)<=>($a['projected_points']??-PHP_FLOAT_MAX))?:strcasecmp($a['name'],$b['name']));
