@@ -55,7 +55,7 @@ class DailyFaceoffStartingGoalies
                 $name=$game[$side.'GoalieName']??null;
                 if(!in_array($team,self::TEAMS,true)||!in_array($opponent,self::TEAMS,true)||$team===$opponent||!is_string($name)||trim($name)==='') throw new RuntimeException('Incomplete matchup team/goalie data');
                 $status=$game[$side.'NewsStrengthName']??'Unconfirmed';
-                if(!in_array($status,['Confirmed','Probable','Unconfirmed'],true)) throw new RuntimeException('Unknown goalie starting status');
+                if(!in_array($status,['Confirmed','Likely','Unconfirmed'],true)) throw new RuntimeException('Unknown goalie starting status');
                 $key=$team.'|'.mb_strtolower(trim($name));
                 if(isset($seen[$key])) throw new RuntimeException('Duplicate matchup goalie');
                 $seen[$key]=true;
